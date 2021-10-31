@@ -1,0 +1,12 @@
+create cluster
+
+$ eksctl create cluster --name eksctl-test --nodegroup-name ng-default --node-type t3.micro --nodes 2
+
+
+create node-group
+
+$ eksctl create nodegroup --config-file=eksctl-create-ng.yaml
+
+get the information
+
+$ eksctl get nodegroup --cluster=eksctl-test
