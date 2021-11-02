@@ -194,10 +194,10 @@ spec:
           mountPath: /fluentd/etc
       containers:
       - name: fluentd-cloudwatch
-        image: fluent/fluentd-kubernetes-daemonset:v1.1-debian-cloudwatch
+        image: fluent/fluentd-kubernetes-daemonset:v1.13-debian-cloudwatch-1
         env:
           - name: REGION
-            value: us-west-2
+            value: ap-northeast-1
           - name: CLUSTER_NAME
             value: eks-loggingtest
         resources:
