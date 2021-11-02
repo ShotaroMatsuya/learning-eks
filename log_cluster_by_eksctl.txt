@@ -1,0 +1,52 @@
+①create cluster with 2 m5.large nodes
+
+$ eksctl create cluster --name eks-loggingtest --nodegroup-name ng-default --node-type m5.large --nodes 2
+
+②attached role of 'CloudWatchLogsFullAccess' to EC2 ON kubernetes
+
+③replace env field with your environment in fluentd.yaml
+
+④apply the nginx service  & hello-k8s-forlog via yaml
+
+⑤deploy load balancer service
+
+⑥get the access to ELB
+$ kubectl get all
+
+⑦elasticsearch deployment
+
+$ aws es create-elasticsearch-domain \
+  --domain-name eks-logs \
+  --elasticsearch-version 7.9 \
+  --elasticsearch-cluster-config \
+  InstanceType=t3.small.elasticsearch,InstanceCount=1 \
+  --ebs-options EBSEnabled=true,VolumeType=gp2,VolumeSize=10 \
+  --access-policies '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["es:*"],"Resource":"*"}]}'
+
+⑧create role to grant es permission to lambda
+⑨Create Amazon OpenSearch Service subscription filter IN cloudwatch logs group
+⑩attach access policy in order to add your IP to white list 
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": [
+        "es:ESHttp*"
+      ],
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": [
+            "192.0.2.0/24"
+          ]
+        }
+      },
+      "Resource": "arn:aws:es:us-west-1:987654321098:domain/test-domain/*"
+    }
+  ]
+}
+⑪clean up resources
+$ eksctl delete cluster --name=eks-loggingtest

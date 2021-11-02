@@ -1,12 +1,23 @@
-create cluster
+①create cluster with 2 t3.micro nodes
 
 $ eksctl create cluster --name eksctl-test --nodegroup-name ng-default --node-type t3.micro --nodes 2
+OR
+$ eksctl create cluster --config-file=eksctl-create-cluster.yaml
 
+※create eks cluster with managed node group
+$ eksctl create cluster --name <name> --version 1.15 --nodegroup-name <nodegrpname> --node-type t3.micro --nodes 2 --managed
 
-create node-group
+②create node-group
 
 $ eksctl create nodegroup --config-file=eksctl-create-ng.yaml
 
-get the information
+③get the information
 
 $ eksctl get nodegroup --cluster=eksctl-test
+$ eksctl get cluster
+
+④delete cluster
+$ eksctl delete cluster --name=eksctl-test
+
+⑤update managed nodegroup
+$ eksctl upgrade nodegroup --name=managed-ng-1 --cluster=managed-cluster

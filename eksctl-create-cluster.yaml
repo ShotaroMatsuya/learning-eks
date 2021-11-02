@@ -4,7 +4,7 @@ kind: ClusterConfig
 
 metadata:
   name: config-file
-  region: us-west-2
+  region: ap-northeast-1
 
 nodeGroups:
   - name: ng-default
