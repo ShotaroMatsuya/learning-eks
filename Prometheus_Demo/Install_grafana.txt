@@ -1,6 +1,7 @@
 1. Install Grafana
 kubectl create namespace grafana
-helm install grafana stable/grafana \
+helm repo add grafana https://grafana.github.io/helm-charts
+helm install grafana grafana/grafana \
     --namespace grafana \
     --set persistence.storageClassName="gp2" \
     --set persistence.enabled=true \
