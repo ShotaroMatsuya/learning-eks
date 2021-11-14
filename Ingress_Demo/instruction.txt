@@ -55,7 +55,7 @@ Deploy an Ingress resource for the 2048 game:
 ※1 added  below tags to all subnet
 AWS Load Balancer Controller バージョン v2.1.1 以前を使用している場合、サブネットに次のようにタグ付けする必要があります。バージョン 2.1.2 以降を使用している場合、このタグはオプションです。ただし、次のいずれかの場合は、サブネットにタグ付けることをお勧めします。同じVPCで実行されている複数のクラスターがあるか、VPCでサブネットを共有する複数の AWS サービスがあります。または、各クラスターに対してロードバランサーをプロビジョニングする場所を詳細に制御する必要があります。cluster-name をクラスター名に置き換えます。
 
-Key: kubernetes.io/cluster/cluster-name
+Key: kubernetes.io/cluster/attractive-gopher
 
 Value: shared
 
@@ -71,3 +71,6 @@ confirm ingress resource created
 $ kubectl get ingress/2048-ingress -n 2048-game
 $ kubectl describe ingress/2048-ingress -n 2048-game
 $ kubectl logs -n kube-system   deployment.apps/alb-ingress-controller
+
+
+https://aws.amazon.com/jp/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/

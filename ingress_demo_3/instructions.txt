@@ -1,0 +1,15 @@
+⑤fixing route /frontend/ correctly
+
+$kubectl exec -it frontend-deployment-5ccdb88c57-cdzcl -n 2048-game -- /bin/bash
+
+# apt-get update
+
+# apt-get install vim
+
+# find -name index.html
+
+# cd /usr/share/nginx/html/
+
+# mkdir frontend
+
+# cp index.html ./frontend/
