@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: "webserver-ingress"
@@ -6,18 +6,26 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/subnets: subnet-086ec9830cf22fcdc,subnet-08713199ba0bb3316,subnet-0ca6b4e0b37204877
+    alb.ingress.kubernetes.io/target-type: ip
   labels:
     app: webserver-ingress
 spec:
   rules:
     - http:
         paths:
+          - path: /frontend/
+            pathType: Prefix
+            backend:
+              service: 
+                name: "service-frontend"
+                port: 
+                  number: 80    
           - path: /*
+            pathType: Prefix
             backend:
-              serviceName: "service-frontend"
-              servicePort: 80
-          - path: /frontend
-            backend:
-              serviceName: "service-frontend"
-              servicePort: 80    
+              service: 
+                name: "service-2048"
+                port: 
+                  number: 80
                 
