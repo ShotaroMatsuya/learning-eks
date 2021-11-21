@@ -1,4 +1,4 @@
-⑤fixing route /frontend/ correctly
+⑤fixing route /backend/ correctly
 
 $kubectl exec -it frontend-deployment-5ccdb88c57-cdzcl -n 2048-game -- /bin/bash
 
@@ -10,6 +10,9 @@ $kubectl exec -it frontend-deployment-5ccdb88c57-cdzcl -n 2048-game -- /bin/bash
 
 # cd /usr/share/nginx/html/
 
-# mkdir frontend
+# mkdir backend
 
-# cp index.html ./frontend/
+# cp ./frontend/index.html ./backend/
+
+
+$ kubectl apply -f ingress-demo-3.yaml

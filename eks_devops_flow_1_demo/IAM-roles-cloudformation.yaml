@@ -3,7 +3,6 @@ AWSTemplateFormatVersion: 2010-09-09
 
 
 Parameters:
-
   KubectlRoleName:
     Type: String
     Default: EksWorkshopCodeBuildKubectlRole
@@ -11,11 +10,7 @@ Parameters:
     MinLength: 3
     MaxLength: 100
     ConstraintDescription: You must enter a kubectl IAM role
-
-
 Resources:
-
-
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -50,8 +45,6 @@ Resources:
                   - s3:GetObject
                   - s3:GetObjectVersion
                   - s3:GetBucketVersioning
-
-
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
