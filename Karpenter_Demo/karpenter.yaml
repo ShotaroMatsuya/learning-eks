@@ -1,0 +1,22 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: default
+spec:
+# Requirements that constrain the parameters of provisioned nodes.
+# Operators { In, NotIn } are supported to enable including or excluding values
+  requirements:
+    - key: node.k8s.aws/instance-type #If not included, all instance types are considered
+      operator: In
+      values: ["m5.large", "m5.2xlarge"]
+    - key: "topology.kubernetes.io/zone" #If not included, all zones are considered
+      operator: In
+      values: ["ap-northeast-1a", "ap-northeast-1c"]
+    - key: "kubernetes.io/arch" #If not included, all architectures are considered
+      values: ["arm64", "amd64"]
+    - key: " karpenter.sh/capacity-type" #If not included, the webhook for the AWS cloud provider will default to on-demand
+      operator: In
+      values: ["spot", "on-demand"]
+  provider:
+    instanceProfile: KarpenterNodeInstanceProfile-eks-karpenter-demo
+  ttlSecondsAfterEmpty: 30
