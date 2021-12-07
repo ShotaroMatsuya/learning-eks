@@ -20,7 +20,11 @@ $ aws es create-elasticsearch-domain \
   --elasticsearch-version 7.9 \
   --elasticsearch-cluster-config \
   InstanceType=t3.small.elasticsearch,InstanceCount=1 \
-  --ebs-options EBSEnabled=true,VolumeType=gp2,VolumeSize=10 \
+  --ebs-options EBSEnabled=true,VolumeType=gp2,VolumeSize=10 
+  
+  
+  (not required↓)
+  \
   --access-policies '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["es:*"],"Resource":"*"}]}'
 
 ⑧create role to grant es permission to lambda
@@ -44,7 +48,7 @@ $ aws es create-elasticsearch-domain \
           ]
         }
       },
-      "Resource": "arn:aws:es:us-west-1:987654321098:domain/test-domain/*"
+      "Resource": "arn:aws:es:ap-northeast-1:528163014577:domain/eks-logs/*"
     }
   ]
 }

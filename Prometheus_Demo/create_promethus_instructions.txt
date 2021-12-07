@@ -27,6 +27,11 @@ $ helm repo add prometheus-community https://prometheus-community.github.io/helm
 $ helm upgrade -i prometheus prometheus-community/prometheus \
     --namespace prometheus \
     --set alertmanager.persistentVolume.storageClass="gp2",server.persistentVolume.storageClass="gp2"
+
+verify thatt all of the pods in the prometheus namespace are in the READY state.
+
+$ kubectl get pods -n prometheus
+
 ④kubectl を使用して、Prometheus コンソールをローカルマシンにポート転送します。
 $ kubectl --namespace=prometheus port-forward deploy/prometheus-server 9090
 

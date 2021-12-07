@@ -199,7 +199,7 @@ spec:
           - name: REGION
             value: ap-northeast-1
           - name: CLUSTER_NAME
-            value: eks-loggingtest
+            value: matsutanishoutarou-karpenter-demo
         resources:
           limits:
             memory: 200Mi
