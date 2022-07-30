@@ -10,11 +10,11 @@ metadata:
   name: fluentd
   namespace: kube-system
 rules:
-- apiGroups: [""]
-  resources:
-  - namespaces
-  - pods
-  verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources:
+      - namespaces
+      - pods
+    verbs: ['get', 'list', 'watch']
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -26,9 +26,9 @@ roleRef:
   kind: ClusterRole
   name: fluentd
 subjects:
-- kind: ServiceAccount
-  name: fluentd
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: fluentd
+    namespace: kube-system
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -184,53 +184,54 @@ spec:
       # this initContainers workaround or other is needed.
       # See https://github.com/fluent/fluentd-kubernetes-daemonset/issues/90
       initContainers:
-      - name: copy-fluentd-config
-        image: busybox
-        command: ['sh', '-c', 'cp /config-volume/..data/* /fluentd/etc']
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config-volume
-        - name: fluentdconf
-          mountPath: /fluentd/etc
+        - name: copy-fluentd-config
+          image: busybox
+          command: ['sh', '-c', 'cp /config-volume/..data/* /fluentd/etc']
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config-volume
+            - name: fluentdconf
+              mountPath: /fluentd/etc
       containers:
-      - name: fluentd-cloudwatch
-        image: fluent/fluentd-kubernetes-daemonset:v1.13-debian-cloudwatch-1
-        env:
-          - name: REGION
-            value: ap-northeast-1
-          - name: CLUSTER_NAME
-            value: matsutanishoutarou-karpenter-demo
-        resources:
-          limits:
-            memory: 200Mi
-          requests:
-            cpu: 100m
-            memory: 200Mi
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config-volume
-        - name: fluentdconf
-          mountPath: /fluentd/etc
-        - name: varlog
-          mountPath: /var/log
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: runlogjournal
-          mountPath: /run/log/journal
-          readOnly: true
+        - name: fluentd-cloudwatch
+          image: fluent/fluentd-kubernetes-daemonset:v1.13-debian-cloudwatch-1
+          env:
+            - name: REGION
+              value: ap-northeast-1
+            - name: CLUSTER_NAME
+              # value: matsutanishoutarou-karpenter-demo
+              value: eks-loggingtest
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config-volume
+            - name: fluentdconf
+              mountPath: /fluentd/etc
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: runlogjournal
+              mountPath: /run/log/journal
+              readOnly: true
       volumes:
-      - name: config-volume
-        configMap:
-          name: fluentd-config
-      - name: fluentdconf
-        emptyDir: {}
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: runlogjournal
-        hostPath:
-          path: /run/log/journal
+        - name: config-volume
+          configMap:
+            name: fluentd-config
+        - name: fluentdconf
+          emptyDir: {}
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: runlogjournal
+          hostPath:
+            path: /run/log/journal

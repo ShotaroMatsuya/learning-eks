@@ -18,6 +18,12 @@ $ eksctl create cluster --config-file=eksctl-create-cluster.yaml
 $ eksctl create cluster --name <name> --version 1.15 --nodegroup-name <nodegrpname> --node-type t3.micro --nodes 2 --managed
 ```
 
+※ ECS Cluster with Fargate Profile
+
+```bash
+$ eksctl create cluster --name <name> --fargate
+```
+
 2. create node-group
 
 ```bash
