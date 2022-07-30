@@ -1,0 +1,47 @@
+repository: stable
+namespace: demo
+minimum_versions:
+  helm: 2.13.1
+  reckoner: 1.4.0
+repositories:
+  incubator:
+    url: https://kubernetes-charts-incubator.storage.googleapis.com
+  stable:
+    url: https://kubernetes-charts.storage.googleapis.com
+  fairwinds-stable:
+    url: https://charts.fairwinds.com/stable
+  fairwinds-incubator:
+    url: https://charts.fairwinds.com/incubator
+  bitnami:
+    url: https://charts.bitnami.com/bitnami
+charts:
+  metrics-server:
+    namespace: metrics-server
+    repository: bitnami
+    version: "4.3.1"
+    values:
+      apiService:
+        create: true
+      extraArgs:
+        kubelet-insecure-tls: 1
+        kubelet-preferred-address-types: InternalIP
+  vpa:
+    namespace: vpa
+    version: "0.1.0"
+    repository: fairwinds-stable
+  load-generator:
+    namespace: demo
+    version: 0.1.1
+    repository: fairwinds-incubator
+    files:
+      - load-generator-values.yaml
+  basic-demo:
+    namespace: demo
+    version: 0.4.0
+    hooks:
+      post_install:
+        - kubectl get ns demo || kubectl create ns demo
+        - kubectl label ns demo --overwrite goldilocks.fairwinds.com/enabled=true
+    repository: fairwinds-incubator
+    files:
+      - demo-values.yaml

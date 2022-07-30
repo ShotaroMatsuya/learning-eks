@@ -1,0 +1,198 @@
+{{ define "container" }}
+{{ $cpuRequest := (index $.Requests (resourceName "cpu")) }}
+{{ $cpuLimit := (index $.Limits (resourceName "cpu")) }}
+{{ $memRequest := (index $.Requests (resourceName "memory")) }}
+{{ $memLimit := (index $.Limits (resourceName "memory")) }}
+
+{{ $cpuLowerBound := (index $.LowerBound (resourceName "cpu")) }}
+{{ $cpuUpperBound := (index $.UpperBound (resourceName "cpu")) }}
+{{ $memLowerBound := (index $.LowerBound (resourceName "memory")) }}
+{{ $memUpperBound := (index $.UpperBound (resourceName "memory")) }}
+
+{{ $cpuTarget := (index $.Target (resourceName "cpu")) }}
+{{ $memTarget := (index $.Target (resourceName "memory")) }}
+
+{{ $icon := "icon"}}
+{{ $text := "text" }}
+{{ $uuid := getUUID }}
+
+<section class="detailInfo --qos verticalRhythm">
+  <h5>
+    <a href="#guaranteed-qos"
+      >Guaranteed <abbr title="Quality of Service">QoS</abbr></a
+    >
+  </h5>
+
+  <table class="compTable callout">
+    <caption class="visually-hidden">
+      Compare Current Config to Guaranteed QoS Recommendations
+    </caption>
+
+    <thead>
+      <tr>
+        <td></td>
+        <th scope="col">Current</th>
+        <td></td>
+        <th scope="col">Guaranteed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">CPU Request</th>
+        <td>{{ printResource $cpuRequest}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatus $cpuRequest $cpuTarget $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatus $cpuRequest $cpuTarget $text }}</span>
+        </td>
+        <td>{{ printResource $cpuTarget }}</td>
+      </tr>
+
+      <tr>
+        <th scope="row">CPU Limit</th>
+        <td>{{ printResource $cpuLimit}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatus $cpuLimit $cpuTarget $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatus $cpuLimit $cpuTarget $text }}</span>
+        </td>
+        <td>{{ printResource $cpuTarget }}</td>
+      </tr>
+
+      <tr>
+        <th scope="row">Memory Request</th>
+        <td>{{ printResource $memRequest}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatus $memRequest $memTarget $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatus $memRequest $memTarget $text }}</span>
+        </td>
+        <td>{{ printResource $memTarget }}</td>
+      </tr>
+
+      <tr>
+        <th scope="row">Memory Limit</th>
+        <td>{{ printResource $memLimit}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatus $memLimit $memTarget $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatus $memLimit $memTarget $text }}</span>
+        </td>
+        <td>{{ printResource $memTarget }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <details>
+    <summary>
+      <h6>Recommended Settings</h6>
+    </summary>
+
+    <pre class="fix-yaml"><code class="language-yaml">resources:
+  requests:
+    cpu: {{ printResource $cpuTarget }}
+    memory: {{ printResource $memTarget }}
+  limits:
+    cpu: {{ printResource $cpuTarget}}
+    memory: {{ printResource $memTarget }}</code></pre>
+  </details>
+</section>
+
+<section class="detailInfo --qos verticalRhythm">
+  <h5>
+    <a href="#burstable-qos"
+      >Burstable <abbr title="Quality of Service">QoS</abbr></a
+    >
+  </h5>
+
+  <table class="compTable callout">
+    <caption class="visually-hidden">
+      Compare Current Config to Burstable QoS Recommendations
+    </caption>
+
+    <thead>
+      <tr>
+        <td></td>
+        <th scope="col">Current</th>
+        <td></td>
+        <th scope="col">Burstable</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">CPU Request</th>
+        <td>{{ printResource $cpuRequest}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatusRange $cpuRequest $cpuLowerBound $cpuUpperBound $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatusRange $cpuRequest $cpuLowerBound $cpuUpperBound $text }}</span>
+        </td>
+        <td>{{ printResource $cpuLowerBound }}</td>
+      </tr>
+
+      <tr>
+        <th scope="row">CPU Limit</th>
+        <td>{{ printResource $cpuLimit}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatusRange $cpuLimit $cpuLowerBound $cpuUpperBound $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatusRange $cpuLimit $cpuLowerBound $cpuUpperBound $text }}</span>
+        </td>
+        <td>{{ printResource $cpuUpperBound }}</td>
+      </tr>
+
+      <tr>
+        <th scope="row">Memory Request</th>
+        <td>{{ printResource $memRequest}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatusRange $memRequest $memLowerBound $memUpperBound $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatusRange $memRequest $memLowerBound $memUpperBound $text }}</span>
+        </td>
+        <td>{{ printResource $memLowerBound }}</td>
+      </tr>
+
+      <tr>
+        <th scope="row">Memory Limit</th>
+        <td>{{ printResource $memLimit}}</td>
+        <td>
+          <i
+            aria-hidden="true"
+            class="compTable__compIcon fas {{ getStatusRange $memLimit $memLowerBound $memUpperBound $icon }}"
+          ></i>
+          <span class="visually-hidden">{{ getStatusRange $memLimit $memLowerBound $memUpperBound $text }}</span>
+        </td>
+        <td>{{ printResource $memUpperBound }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <details>
+    <summary>
+      <h6>Recommended Settings</h6>
+    </summary>
+
+    <pre class="fix-yaml"><code class="language-yaml">resources:
+  requests:
+    cpu: {{ printResource $cpuLowerBound }}
+    memory: {{ printResource $memLowerBound }}
+  limits:
+    cpu: {{ printResource $cpuUpperBound}}
+    memory: {{ printResource $memUpperBound }}</code></pre>
+  </details>
+</section>
+{{ end }}

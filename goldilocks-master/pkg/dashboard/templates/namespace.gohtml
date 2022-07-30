@@ -1,0 +1,69 @@
+{{define "namespace"}}
+{{ $foundFirstWorkload := false }}
+
+<article data-filter="{{ $.Namespace }}">
+  <details class="detailInfo --namespace verticalRhythm" open>
+    <summary class="--hideMarker">
+      <h2>
+        <span aria-label="Namespace:" class="badge detailBadge --namespace"
+          >Namespace</span
+        >
+        {{ $.Namespace }}
+        <i aria-hidden="true" class="fas fa-fw fa-angle-down --showWhenClosed"></i
+        ><i aria-hidden="true" class="fas fa-fw fa-angle-up --showWhenOpen"></i>
+      </h2>
+      <p>
+        <a
+          class="detailLink --namespace"
+          href="{{ $.BasePath }}dashboard/{{ $.Namespace }}"
+        >View only this namespace</a>
+      </p>
+    </summary>
+
+    {{ if lt (len $.Workloads) 1 }}
+    <section class="detailInfo --empty">
+      <p>No workloads found in this namespace.</p>
+    </section>
+
+    {{ else }}
+      {{ range $workload := $.Workloads }}
+    <details class="detailInfo --deployment verticalRhythm"
+        {{ if not $foundFirstWorkload }}
+          {{ $foundFirstWorkload = true }} open
+        {{ end }}>
+      <summary class="--hideMarker">
+        <h3>
+          <span aria-label="Workload:" class="badge detailBadge --deployment"
+            >{{ $workload.ControllerType }}</span
+          >
+          {{ $workload.ControllerName }}
+          <i aria-hidden="true" class="fas fa-fw fa-angle-down --showWhenClosed"></i
+          ><i aria-hidden="true" class="fas fa-fw fa-angle-up --showWhenOpen"></i>
+        </h3>
+      </summary>
+
+      {{ range $cName, $cSummary := $workload.Containers }}
+      <details class="detailInfo --container verticalRhythm" open>
+        <summary class="--hideMarker">
+          <h4>
+            <span aria-label="Container:" class="badge detailBadge --container"
+              >Container</span
+            >
+            {{ $cName }}
+            <i aria-hidden="true" class="fas fa-fw fa-angle-down --showWhenClosed"></i
+            ><i aria-hidden="true" class="fas fa-fw fa-angle-up --showWhenOpen"></i>
+          </h4>
+        </summary>
+
+        <div class="layoutLineup">
+          {{ template "container" $cSummary }}
+        </div>
+      </details>
+      {{ end }}
+    </details>
+      {{ end }}
+    {{ end }}
+
+  </details>
+</article>
+{{end}}
