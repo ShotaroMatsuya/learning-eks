@@ -12,8 +12,7 @@ kubectl patch svc nginx -p '{"spec": {"type": "LoadBalancer"}}'
 
 echo "Starting to hammer the load balancer:"
 
-# nginxurl=$(kubectl get svc/nginx -o json | jq .status.loadBalancer.ingress[].hostname -r)
-nginxurl="a7f4ecf468379437586e474ce716cd7e-1232473850.ap-northeast-1.elb.amazonaws.com"
+nginxurl=$(kubectl get svc/nginx -o json | jq .status.loadBalancer.ingress[].hostname -r)
 while true
 do
     printf "Hit " 

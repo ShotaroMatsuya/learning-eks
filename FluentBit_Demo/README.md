@@ -36,9 +36,6 @@ $ aws firehose create-delivery-stream \
  --delivery-stream-name eks-stream \
  --delivery-stream-type DirectPut \
  --s3-destination-configuration \
-```
-
-```
 RoleARN=arn:aws:iam::528163014577:role/firehose_delivery_role,\
 BucketARN="arn:aws:s3:::eks-fluentbit-demo-smat",\
 Prefix=eks
@@ -73,6 +70,10 @@ $ kubectl logs ds/fluentbit
 ```
 
 ## create service & ouput elb dns
+
+```bash
+kubectl apply -f eks-nginx-app.yaml
+```
 
 a7f4ecf468379437586e474ce716cd7e-1232473850.ap-northeast-1.elb.amazonaws.com
 
