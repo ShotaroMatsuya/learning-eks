@@ -241,10 +241,42 @@ Install the following plugins for the demo.
 
 Install ArgoCD in your Kubernetes cluster following this link - https://argo-cd.readthedocs.io/en/stable/getting_started/
 
+1. Install Argo CD
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+2. Download Argo CD CLI
+
+```bash
+brew install argocd
+```
+
+3. Access The Argo CD API Server
+   Port Forwarding
+   Kubectl port-forwarding can also be used to connect to the API server without exposing the service.
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+The API server can then be accessed using https://localhost:8080
+
+4. Login Using The CLI
+   The initial password for the admin account is auto-generated and stored as clear text in the field password in a secret named argocd-initial-admin-secret in your Argo CD installation namespace. You can simply retrieve this password using kubectl:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+Using the username admin and the password from above, login to Argo CD's IP or hostname:
+
+```bash
+argocd login <ARGOCD_SERVER>
+```
+
 ## How to run!
 
 Follow along with my Udemy Kubernetes course lectures (GitOps Chapter) to understand how it works, detailed setup instructions, with step by step demo. My highest rated Kubernetes EKS discounted Udemy course link in www.cloudwithraj.com
-
-```
-
-```
