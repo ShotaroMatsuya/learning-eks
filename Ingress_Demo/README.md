@@ -1,4 +1,4 @@
-# EKS Ingress DEMO1
+# EKS Ingress DEMO1 (deprecated)
 
 1. Deploy Amazon EKS with eksctl
    $ eksctl create cluster --name=attractive-gopher
@@ -97,4 +97,4 @@ $ kubectl describe ingress/2048-ingress -n 2048-game
 $ kubectl logs -n kube-system deployment.apps/alb-ingress-controller
 ```
 
-https://aws.amazon.com/jp/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/
+[Documentation](https://aws.amazon.com/jp/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/)
