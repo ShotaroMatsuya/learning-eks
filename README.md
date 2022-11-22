@@ -48,3 +48,18 @@ $ eksctl delete cluster --name=eksctl-test
 ```bash
 $ eksctl upgrade nodegroup --name=managed-ng-1 --cluster=managed-cluster
 ```
+
+---
+
+# EKS Cluster の構築
+
+```bash
+eksctl create cluster \
+      --name eks-cluster \
+      --version 1.22 \
+      --with-oidc \
+      --nodegroup-name eks-cluster-node-group \
+      --node-type c5.large \
+      --nodes 1 \
+      --nodes-min 1
+```
