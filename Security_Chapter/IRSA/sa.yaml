@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: default
+  name: batch
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::528163014577:role/batch-sa-role
