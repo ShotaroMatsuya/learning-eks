@@ -1,0 +1,13 @@
+apiVersion: vpcresources.k8s.aws/v1beta1
+kind: SecurityGroupPolicy
+metadata:
+  name: my-sg-policy
+spec:
+  podSelector:
+    matchLabels:
+      # SGを適用するPodの条件
+      role: backend
+  securityGroups:
+    groupIds:
+      - sg-05052b6526ce16947 # Cluster用SG
+      - sg-0188682d538cdca68 # Pod用SG
