@@ -1,11 +1,7 @@
 on:
-  pull_request:
+  push:
     branches:
       - staging
-    paths:
-    - "**/*.py"
-    - "**/*.yaml"
-    types: [closed]
 
 permissions: write-all
 
@@ -23,49 +19,63 @@ jobs:
     name: Staging Build and Push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
 
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        token: ${{secrets.GITHUB_TOKEN}}
-        
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
-        aws-region: ap-northeast-1
-      
-    - name: Login to ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-      
-    - name: Build and tag the image
-      run: |
-        docker build \
-          -t $CONTAINER_IMAGE \
-          -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE .
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+          aws-region: ap-northeast-1
 
-    - name: Set image tag
-      run: |
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and tag the image
+        run: |
+          docker build \
+            -t $CONTAINER_IMAGE \
+            -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.CONTAINER_IMAGE }}'
+          format: 'template'
+          template: '@/contrib/asff.tpl'
+          output: 'report.asff'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
+
+      - name: Upload Trivy scan results to AWS Security Hub
+        if: ${{ failure() }}
+        run: |
+          cat report.asff | jq '.Findings' > report_fix.asff && aws securityhub batch-import-findings --findings file://report_fix.asff
+
+      - name: Set image tag
+        run: |
           cd kustomize/overlays/staging
           kustomize edit set image $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE
           cat kustomization.yaml
-  
-    - name: Commit kustomization
-      run: |
+
+      - name: Commit kustomization
+        run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -a -m "$CONTAINER_IMAGE"
-  
-    - name: Docker Push
-      run: |
-        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE
-  
-    - name: Git push changes to staging
-      uses: ad-m/github-push-action@master
-      with:
+
+      - name: Docker Push
+        run: |
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE
+
+      - name: Git push changes to staging
+        uses: ad-m/github-push-action@master
+        with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: staging
           force: true
-  
-  
