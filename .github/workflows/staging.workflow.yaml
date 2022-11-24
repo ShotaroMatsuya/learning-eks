@@ -1,11 +1,7 @@
 on:
-  pull_request:
+  push:
     branches:
       - staging
-    paths:
-      - '**/*.py'
-      - '**/*.yaml'
-    types: [closed]
 
 permissions: write-all
 
@@ -41,9 +37,26 @@ jobs:
       - name: Build and tag the image
         run: |
           docker build \
+            -f flux_sample/Dockerfile
             -t $CONTAINER_IMAGE \
-            -f flux_sample/sample-app/Dockerfile \
-            -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE ./flux_sample/sample-app/
+            -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE ./flux_sample/sample-app
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.CONTAINER_IMAGE }}'
+          format: 'template'
+          template: '@/contrib/asff.tpl'
+          output: 'report.asff'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
+
+      - name: Upload Trivy scan results to AWS Security Hub
+        if: ${{ failure() }}
+        run: |
+          cat report.asff | jq '.Findings' > report_fix.asff && aws securityhub batch-import-findings --findings file://report_fix.asff
 
       - name: Set image tag
         run: |
