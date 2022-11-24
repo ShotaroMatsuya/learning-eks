@@ -1,5 +1,27 @@
 # flux sample
 
+## Terraform 実行
+
+```bash
+terraform init
+terraform apply -auto-approve
+```
+
+## サンプルアプリのデプロイ
+
+```bash
+# Dockerfimageの作成
+aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 528163014577.dkr.ecr.ap-northeast-1.amazonaws.com
+docker build -t sample-app .
+docker tag sample-app:latest 528163014577.dkr.ecr.ap-northeast-1.amazonaws.com/sample-app:latest
+docker push 528163014577.dkr.ecr.ap-northeast-1.amazonaws.com/sample-app:latest
+```
+
+```bash
+# AWS LoadBalancer Controllerのインストールを確認
+kubectl get deployment -n kube-system aws-load-balancer-controller
+```
+
 1. Flux のインストール
 
 ```bash

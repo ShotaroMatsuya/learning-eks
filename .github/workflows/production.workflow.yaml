@@ -1,11 +1,15 @@
 on:
-  push:
+  pull_request:
     branches:
-      - staging
+      - master
+    paths:
+      - '**/*.py'
+      - '**/*.yaml'
+    types: [closed]
 
 permissions: write-all
 
-name: Staging Build and Push an Image to ECR
+name: Production Build and Push an Image to ECR
 
 env:
   AWS_DEFAULT_REGION: ap-northeast-1
@@ -16,7 +20,7 @@ env:
 
 jobs:
   build-and-push:
-    name: Staging Build and Push
+    name: Production Build and Push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,28 +42,12 @@ jobs:
         run: |
           docker build \
             -t $CONTAINER_IMAGE \
-            -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE .
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.CONTAINER_IMAGE }}'
-          format: 'template'
-          template: '@/contrib/asff.tpl'
-          output: 'report.asff'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL'
-
-      - name: Upload Trivy scan results to AWS Security Hub
-        if: ${{ failure() }}
-        run: |
-          cat report.asff | jq '.Findings' > report_fix.asff && aws securityhub batch-import-findings --findings file://report_fix.asff
+            -f flux_sample/sample-app/Dockerfile \
+            -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE ./flux_sample/sample-app/
 
       - name: Set image tag
         run: |
-          cd kustomize/overlays/staging
+          cd flux_sample/sample-app/kustomize/overlays/production
           kustomize edit set image $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE
           cat kustomization.yaml
 
@@ -73,9 +61,9 @@ jobs:
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE
 
-      - name: Git push changes to staging
+      - name: Git push changes to main
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: staging
+          branch: main
           force: true
