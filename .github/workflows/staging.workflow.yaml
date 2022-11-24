@@ -37,8 +37,8 @@ jobs:
       - name: Build and tag the image
         run: |
           docker build \
-            -f flux_sample/Dockerfile
             -t $CONTAINER_IMAGE \
+            -f flux_sample/sample-app/Dockerfile \
             -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE ./flux_sample/sample-app/
 
       - name: Run Trivy vulnerability scanner
