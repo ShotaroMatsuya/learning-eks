@@ -39,7 +39,7 @@ jobs:
           docker build \
             -f flux_sample/Dockerfile
             -t $CONTAINER_IMAGE \
-            -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE ./flux_sample/sample-app
+            -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CONTAINER_IMAGE ./flux_sample/sample-app/
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
