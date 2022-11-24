@@ -8,4 +8,4 @@ replicas:
   name: deployment
 images:
 - name: 528163014577.dkr.ecr.ap-northeast-1.amazonaws.com/sample-app
-  newTag: 4f91c9931db6c5f52cc444fdab4630f1594aa6e2
+  newTag: f41d1363ecd6faf5bcf7fba120e79727ffe14a87
