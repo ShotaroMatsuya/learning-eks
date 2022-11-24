@@ -1,0 +1,19 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-to-nginx-egress
+  namespace: default
+spec:
+  policyTypes:
+  - Egress
+  podSelector:
+    matchLabels:
+      app: test-pd
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: nginx
+    ports:
+    - protocol: TCP
+      port: 80

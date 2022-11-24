@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: batch
+  namespace: default
+spec:
+  containers:
+    - name: batch
+      image: amazon/aws-cli:2.7.7
+      command: ['aws']
+      args: ['s3', 'ls', 'eks-terraform-smat'] # S3バケット名を指定
+  serviceAccountName: batch

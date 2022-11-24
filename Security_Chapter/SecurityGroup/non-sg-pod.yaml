@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: aurora-mysql-test-non-sg
+spec:
+  containers:
+  - name: aurora-mysql-test-non-sg
+    image: centos:7
+    command: ["sleep", "36000"]

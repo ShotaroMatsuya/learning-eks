@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: aurora-mysql-test
+  labels:
+    role: backend
+spec:
+  containers:
+  - name: aurora-mysql-test
+    image: centos:7
+    command: ["sleep", "36000"]

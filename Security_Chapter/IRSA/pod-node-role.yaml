@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-node-role
+  namespace: default
+spec:
+  containers:
+  - name: pod-node-role
+    image: amazon/aws-cli:2.7.7
+    command: ["aws"]
+    args: ["ecr", "describe-repositories"]
