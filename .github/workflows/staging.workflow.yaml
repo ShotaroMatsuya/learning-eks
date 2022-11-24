@@ -14,10 +14,12 @@ env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   CONTAINER_IMAGE: sample-app:${{ github.sha }}
   DOCKERFILE_PATH: ./flux_sample/sample-app/Dockerfile
+  POLARIS_VERSION: 5.0.0
+  K8S_MANIFEST_PATH: ./flux_sample/sample-app/kustomize
 
 jobs:
   lint:
-    name: Lint Dockerfile
+    name: Lint Dockerfile and Kubernetes Manifest
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,6 +31,14 @@ jobs:
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: ${{ env.DOCKERFILE_PATH }}
+
+      - name: Setup Polaris
+        uses: fairwindsops/polaris/.github/actions/setup-polaris@master
+        with:
+          version: ${{ env.POLARIS_VERSION }}
+
+      - name: Lint Kubernetes Manifest
+        run: polaris audit --audit-path ${{ env.K8S_MANIFEST_PATH }} --only-show-failed-tests true --format=pretty --set-exit-code-on-danger
 
   build-and-push:
     name: Staging Build and Push
