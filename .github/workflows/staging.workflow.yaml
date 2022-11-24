@@ -13,10 +13,26 @@ env:
   AWS_DEFAULT_OUTPUT: json
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   CONTAINER_IMAGE: sample-app:${{ github.sha }}
+  DOCKERFILE_PATH: ./flux_sample/sample-app/Dockerfile
 
 jobs:
+  lint:
+    name: Lint Dockerfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: ${{ env.DOCKERFILE_PATH }}
+
   build-and-push:
     name: Staging Build and Push
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
