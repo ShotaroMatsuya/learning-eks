@@ -63,3 +63,17 @@ eksctl create cluster \
       --nodes 1 \
       --nodes-min 1
 ```
+
+# クラスターの削除
+
+EKS Cluster を削除する前に、Service Type が LoadBalancer の Service が存在するばあいは、事前に削除
+
+```bash
+kubectl delete svc service
+```
+
+cluster の削除
+
+```bash
+eksctl delete cluster --name eks-cluster
+```

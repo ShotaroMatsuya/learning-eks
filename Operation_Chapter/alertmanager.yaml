@@ -1,0 +1,12 @@
+alertmanager_config: |
+  route:
+    receiver: 'default'
+  receivers:
+    - name: 'default'
+      sns_configs:
+      - topic_arn: arn:aws:sns:ap-northeast-1:528163014577:eks-cluster
+        sigv4:
+          region: ap-northeast-1
+        attributes:
+          key: severity
+          value: SEV2

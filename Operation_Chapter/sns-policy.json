@@ -1,0 +1,23 @@
+{
+  "Version": "2008-10-17",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+      "Sid": "Allow_Publish_Alarms",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "aps.amazonaws.com"
+      },
+      "Action": ["sns:Publish", "sns:GetTopicAttributes"],
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:aps:ap-northeast-1:528163014577:workspace/ws-2a9dbce8-0439-43b0-870b-ab50af9a5f0b"
+        },
+        "StringEquals": {
+          "AWS:SourceAccount": "528163014577"
+        }
+      },
+      "Resource": "arn:aws:sns:ap-northeast-1:528163014577:eks-cluster"
+    }
+  ]
+}
