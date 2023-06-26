@@ -558,8 +558,277 @@ kubectl get sc,pvc,pv
 
 ---
 
-# Namespaces
+# Kubernetes Namespaces - Imperative using kubectl
 
-1. Namespaces - Imperative using kubectl
-2. Namespaces -  Declarative using YAML & LimitRange
-3. Namespaces -  Declarative using YAML & ResourceQuota
+## Step-01: Introduction
+- Namespaces allow to split-up resources into different groups.
+- Resource names should be unique in a namespace
+- We can use namespaces to create multiple environments like dev, staging and production etc
+- Kubernetes will always list the resources from `default namespace` unless we provide exclusively from which namespace we need information from.
+
+## Step-02: Namespaces Generic - Deploy in Dev1 and Dev2
+### Create Namespace
+```
+# List Namespaces
+kubectl get ns 
+
+# Craete Namespace
+kubectl create namespace <namespace-name>
+kubectl create namespace dev1
+kubectl create namespace dev2
+
+# List Namespaces
+kubectl get ns 
+```
+### Comment NodePort in UserMgmt NodePort Service
+- **File: 07-UserManagement-Service.yml**
+- **Why?:**
+  - Whenever we create with same manifests multiple environments like dev1, dev2 with namespaces, we cannot have same worker node port for multiple services. 
+  - We will have port conflict. 
+  - Its good for k8s system to provide dynamic nodeport for us in such situations.
+```yml
+      #nodePort: 31231
+```
+- **Error** if not commented
+```log
+The Service "usermgmt-restapp-service" is invalid: spec.ports[0].nodePort: Invalid value: 31231: provided port is already allocated
+```
+### Deploy All k8s Objects
+```
+# Deploy All k8s Objects
+kubectl apply -f kube-manifests/ -n dev1
+kubectl apply -f kube-manifests/ -n dev2
+
+# List all objects from dev1 & dev2 Namespaces
+kubectl get all -n dev1
+kubectl get all -n dev2
+```
+## Step-03: Verify SC,PVC and PV
+- **Shorter Note**
+  - PVC is a namespace specific resource
+  - PV and SC are generic
+- **Observation-1:** `Persistent Volume Claim (PVC)` gets created in respective namespaces
+```
+# List PVC for dev1 and dev2
+kubectl get pvc -n dev1
+kubectl get pvc -n dev2
+```
+- **Observation-2:** `Storage Class (SC) and Persistent Volume (PV)` gets created generic. No specifc namespace for them   
+```
+# List sc,pv
+kubect get sc,pv
+```
+## Step-04: Access Application
+### Dev1 Namespace
+```
+# Get Public IP
+kubectl get nodes -o wide
+
+# Get NodePort for dev1 usermgmt service
+kubectl get svc -n dev1
+
+# Access Application
+http://<Worker-Node-Public-Ip>:<Dev1-NodePort>/usermgmt/health-stauts
+```
+### Dev2 Namespace
+```
+# Get Public IP
+kubectl get nodes -o wide
+
+# Get NodePort for dev2 usermgmt service
+kubectl get svc -n dev2
+
+# Access Application
+http://<Worker-Node-Public-Ip>:<Dev2-NodePort>/usermgmt/health-stauts
+```
+## Step-05: Clean-Up
+```
+# Delete namespaces dev1 & dev2
+kubectl delete ns dev1
+kubectl delete ns dev2
+
+# List all objects from dev1 & dev2 Namespaces
+kubectl get all -n dev1
+kubectl get all -n dev2
+
+# List Namespaces
+kubectl get ns
+
+# List sc,pv
+kubectl get sc,pv
+
+# Delete Storage Class
+kubectl delete sc ebs-sc
+
+# Get all from All Namespaces
+kubectl get all -all-namespaces
+```
+
+## References:
+- https://kubernetes.io/docs/tasks/administer-cluster/namespaces-walkthrough/
+
+---
+
+# Kubernetes Namespaces - LimitRange - Declarative using YAML
+## Step-01: Create Namespace manifest
+- **Important Note:** File name starts with `00-`  so that when creating k8s objects namespace will get created first so it don't throw an error.
+```yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev3
+```
+
+## Step-02: Create LimitRange manifest
+- Instead of specifying `resources like cpu and memory` in every container spec of a pod defintion, we can provide the default CPU & Memory for all containers in a namespace using `LimitRange`
+```yml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ns-resource-quota
+  namespace: dev3
+spec:
+  limits:
+    - default:
+        memory: "512Mi" # If not specified the Container's memory limit is set to 512Mi, which is the default memory limit for the namespace.
+        cpu: "500m"  # If not specified default limit is 1 vCPU per container 
+      defaultRequest:
+        memory: "256Mi" # If not specified default it will take from whatever specified in limits.default.memory
+        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu
+      type: Container                        
+```
+
+## Step-03: Update all k8s manifest with namespace
+- Update all files from 02 to 08 with `namespace: dev3` in top metadata section in folder `kube-manifests/02-Declarative` 
+- **Example**
+```yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebs-mysql-pv-claim
+  namespace: dev3
+```
+
+## Step-04: Create k8s objects & Test
+```
+# Create All Objects
+kubectl apply -f kube-manifests/
+
+# List Pods
+kubectl get pods -n dev3 -w
+
+# View Pod Specification (CPU & Memory)
+kubectl get pod <pod-name> -o yaml -n dev3
+
+# Get & Describe Limits
+kubectl get limits -n dev3
+kubectl describe limits default-cpu-mem-limit-range -n dev3
+
+# Get NodePort
+kubectl get svc -n dev3
+
+# Get Public IP of a Worker Node
+kubectl get nodes -o wide
+
+# Access Application Health Status Page
+http://<WorkerNode-Public-IP>:<NodePort>/usermgmt/health-status
+
+```
+## Step-05: Clean-Up
+- Delete all k8s objects created as part of this section
+```
+# Delete All
+kubectl delete -f kube-manifests/
+```
+
+
+
+
+
+
+
+## References:
+- https://kubernetes.io/docs/tasks/administer-cluster/namespaces-walkthrough/
+- https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/cpu-default-namespace/
+- https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/
+
+
+---
+
+# Kubernetes Namespaces - ResourceQuota - Declarative using YAML
+
+## Step-01: Create Namespace manifest
+- **Important Note:** File name starts with `00-`  so that when creating k8s objects namespace will get created first so it don't throw an error.
+```yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev3
+```
+
+## Step-02: Create ResourceQuota manifest
+```yml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ns-resource-quota
+  namespace: dev3
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi  
+    pods: "5"    
+    configmaps: "5" 
+    persistentvolumeclaims: "5" 
+    replicationcontrollers: "5" 
+    secrets: "5" 
+    services: "5"                      
+```
+
+
+## Step-03: Create k8s objects & Test
+```
+# Create All Objects
+kubectl apply -f kube-manifests/
+
+# List Pods
+kubectl get pods -n dev3 -w
+
+# View Pod Specification (CPU & Memory)
+kubectl get pod <pod-name> -o yaml -n dev3
+
+# Get & Describe Limits
+kubectl get limits -n dev3
+kubectl describe limits default-cpu-mem-limit-range -n dev3
+
+# Get Resource Quota 
+kubectl get quota -n dev3
+kubectl describe quota ns-resource-quota -n dev3
+
+# Get NodePort
+kubectl get svc -n dev3
+
+# Get Public IP of a Worker Node
+kubectl get nodes -o wide
+
+# Access Application Health Status Page
+http://<WorkerNode-Public-IP>:<NodePort>/usermgmt/health-status
+
+```
+## Step-04: Clean-Up
+- Delete all k8s objects created as part of this section
+```
+# Delete All
+kubectl delete -f kube-manifests/
+```
+
+## References:
+- https://kubernetes.io/docs/tasks/administer-cluster/namespaces-walkthrough/
+- https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/
+
+
+## Additional References:
+- https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/cpu-constraint-namespace/ 
+- https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-constraint-namespace/

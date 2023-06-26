@@ -52,10 +52,10 @@ spec:
               port: 8095
             initialDelaySeconds: 60
             periodSeconds: 10
-          resources:
-            requests:
-              memory: "128Mi" # 128 MebiByte is equal to 135 Megabyte (MB)
-              cpu: "500m" # `m` means milliCPU
-            limits:
-              memory: "500Mi"
-              cpu: "1000m"  # 1000m is equal to 1 VCPU core      
+          # resources:
+          #   requests:
+          #     memory: "128Mi" # 128 MebiByte is equal to 135 Megabyte (MB)
+          #     cpu: "500m" # `m` means milliCPU
+          #   limits:
+          #     memory: "500Mi"
+          #     cpu: "1000m"  # 1000m is equal to 1 VCPU core      
