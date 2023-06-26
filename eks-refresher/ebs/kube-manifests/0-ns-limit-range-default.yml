@@ -11,9 +11,26 @@ metadata:
 spec:
   limits:
     - default:
-        cpu: "500m"  # If not specified default limit is 1 vCPU per container     
         memory: "512Mi" # If not specified the Container's memory limit is set to 512Mi, which is the default memory limit for the namespace.
+        cpu: "500m"  # If not specified default limit is 1 vCPU per container 
       defaultRequest:
-        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu      
         memory: "256Mi" # If not specified default it will take from whatever specified in limits.default.memory
-      type: Container 
+        cpu: "300m" # If not specified default it will take from whatever specified in limits.default.cpu
+      type: Container                        
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ns-resource-quota
+  namespace: dev3
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi  
+    pods: "5"    
+    configmaps: "5" 
+    persistentvolumeclaims: "5" 
+    secrets: "5" 
+    services: "5" 
