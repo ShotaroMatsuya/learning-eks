@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: extdns-lbc-network-lb
+  annotations:
+    # Traffic Routing
+    service.beta.kubernetes.io/aws-load-balancer-name: extdns-lbc-network-lb
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+    #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-xxxx, mySubnet ## Subnets are auto-discovered if this annotation is not specified, see Subnet Discovery for further details.
+    
+    # Health Check Settings
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: traffic-port
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /index.html
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10" # The controller currently ignores the timeout configuration due to the limitations on the AWS NLB. The default timeout for TCP is 10s and HTTP is 6s.
+
+    # Access Control
+    service.beta.kubernetes.io/load-balancer-source-ranges: 0.0.0.0/0 
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
+    # AWS Resource Tags
+    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: Environment=dev,Team=test
+
+    # TLS
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-northeast-1:528163014577:certificate/148becc9-f039-4577-a32c-be0905127913
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: 443, # Specify this annotation if you need both TLS and non-TLS listeners on the same load balancer
+    service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp 
+
+    # External DNS - For creating a Record Set in Route53
+    external-dns.alpha.kubernetes.io/hostname: nlbdns102.smat710.tk
+spec:
+  type: LoadBalancer
+  selector:
+    app: app3-nginx
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80    
+    - name: https
+      port: 443
+      targetPort: 80      
