@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: v2-notification-microservice
+  labels:
+    app: notification-restapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-restapp     
+  template:
+    metadata:
+      labels:
+        app: notification-restapp
+    spec:
+      containers:
+        - name: notification-service
+          image: stacksimplify/kube-notifications-microservice:4.0.0-AWS-XRay
+          ports:
+            - containerPort: 8096
+          imagePullPolicy: Always
+          env:
+            - name: AWS_MAIL_SERVER_HOST
+              value: "smtp-service"
+            - name: AWS_MAIL_SERVER_USERNAME
+              value: "AKIAXV6HYA6YQOOSJ6AC"
+            - name: AWS_MAIL_SERVER_PASSWORD
+              value: "BDjkQ5EadLPOpV16N6rbCiT/huF4oyzeutXVdJm2G0e7"
+            - name: AWS_MAIL_SERVER_FROM_ADDRESS
+              value: "matsuya@h01.itscom.net"
+            - name: AWS_XRAY_TRACING_NAME 
+              value: "V2-Notification-Microservice"              
+            - name: AWS_XRAY_DAEMON_ADDRESS
+              value: "xray-service.default:2000"      
+            - name: AWS_XRAY_CONTEXT_MISSING 
+              value: "LOG_ERROR"  # Log an error and continue, Ideally RUNTIME_ERROR – Throw a runtime exception which is default option if not configured                                             
