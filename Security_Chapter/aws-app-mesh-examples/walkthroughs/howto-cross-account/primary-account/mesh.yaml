@@ -1,0 +1,92 @@
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Project name to link stacks
+
+Resources:
+  Mesh:
+    Type: AWS::AppMesh::Mesh
+    Properties:
+      MeshName: !Sub '${ProjectName}-mesh'
+
+  VirtualGateway:
+    Type: AWS::AppMesh::VirtualGateway
+    Properties:
+      MeshName: !GetAtt Mesh.MeshName
+      Spec:
+        Listeners:
+        - PortMapping:
+            Port: 80
+            Protocol: http
+      VirtualGatewayName: gateway-vg
+
+  GatewayRoute:
+    Type: AWS::AppMesh::GatewayRoute
+    Properties:
+      GatewayRouteName: gateway-gr
+      MeshName: !GetAtt Mesh.MeshName
+      Spec:
+        HttpRoute:
+          Action:
+            Target:
+              VirtualService:
+                VirtualServiceName: !GetAtt VirtualService.VirtualServiceName
+          Match:
+            Prefix: /
+      VirtualGatewayName: !GetAtt VirtualGateway.VirtualGatewayName
+
+  BackendNode:
+    Type: AWS::AppMesh::VirtualNode
+    Properties:
+      MeshName: !GetAtt Mesh.MeshName
+      VirtualNodeName: backend-1-vn
+      Spec:
+        Listeners:
+        - PortMapping:
+            Port: 80
+            Protocol: http
+        ServiceDiscovery:
+          AWSCloudMap:
+            NamespaceName: !Sub '${ProjectName}.local'
+            ServiceName: backend
+
+  VirtualRouter:
+    Type: AWS::AppMesh::VirtualRouter
+    Properties:
+      MeshName: !GetAtt Mesh.MeshName
+      VirtualRouterName: backend-vr
+      Spec:
+        Listeners:
+        - PortMapping:
+            Port: 80
+            Protocol: http
+
+  VirtualService:
+    DependsOn:
+     - VirtualRouter
+    Type: AWS::AppMesh::VirtualService
+    Properties:
+      MeshName: !GetAtt Mesh.MeshName
+      VirtualServiceName: !Sub 'backend.${ProjectName}.local'
+      Spec:
+        Provider:
+          VirtualRouter:
+            VirtualRouterName: backend-vr
+
+  Route:
+    DependsOn:
+     - VirtualRouter
+     - BackendNode
+    Type: AWS::AppMesh::Route
+    Properties:
+      MeshName: !GetAtt Mesh.MeshName
+      VirtualRouterName: backend-vr
+      RouteName: backend-route
+      Spec:
+        HttpRoute:
+          Action:
+            WeightedTargets:
+            - VirtualNode: backend-1-vn
+              Weight: 1
+          Match:
+            Prefix: /

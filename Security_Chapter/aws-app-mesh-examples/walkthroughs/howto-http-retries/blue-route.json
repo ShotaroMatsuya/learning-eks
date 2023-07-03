@@ -1,0 +1,31 @@
+{
+  "virtualRouterName": "color-router",
+  "routeName": "color-route-blue",
+  "spec": {
+    "priority": 1,
+    "httpRoute": {
+      "match": {
+        "prefix": "/"
+      },
+      "action": {
+        "weightedTargets": [
+          {
+            "virtualNode": "blue-node",
+            "weight": 1
+          }
+        ]
+      },
+      "retryPolicy" : {
+        "maxRetries" : 10,
+        "perRetryTimeout" : {
+          "value" : 100,
+          "unit" : "ms"
+        },
+        "httpRetryEvents" : [
+          "server-error"
+        ]
+      }
+
+    }
+  }
+}
